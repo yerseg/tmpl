@@ -139,7 +139,7 @@ struct ToContext : detail::ToContextImpl<Opts>
 }  // namespace detail
 }  // namespace tmpl
 
-#define TMPL_STR(name) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::String, EKA_MPL_STRING(#name)>
+#define TMPL_STR(name) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::String, TMPL_MP_STRING(#name)>
 
 #define TMPL_TYPE(type) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Type, type>
 

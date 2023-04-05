@@ -3,8 +3,6 @@
 #include "context.h"
 #include "options.h"
 
-#include <boost/mpl/string.hpp>
-
 #include <iostream>
 
 namespace tmpl {

@@ -1,36 +1,6 @@
 [submodule "contrib/mp11"]
 	path = contrib/mp11
 	url = https://github.com/boostorg/mp11.git
-[submodule "contrib/mpl"]
-	path = contrib/mpl
-	url = https://github.com/boostorg/mpl.git
-[submodule "contrib/config"]
-	path = contrib/config
-	url = https://github.com/boostorg/config.git
-[submodule "contrib/core"]
-	path = contrib/core
-	url = https://github.com/boostorg/core.git
-[submodule "contrib/assert"]
-	path = contrib/assert
-	url = https://github.com/boostorg/assert.git
-[submodule "contrib/static_assert"]
-	path = contrib/static_assert
-	url = https://github.com/boostorg/static_assert.git
-[submodule "contrib/throw_exception"]
-	path = contrib/throw_exception
-	url = https://github.com/boostorg/throw_exception.git
-[submodule "contrib/predef"]
-	path = contrib/predef
-	url = https://github.com/boostorg/predef.git
 [submodule "contrib/preprocessor"]
 	path = contrib/preprocessor
 	url = https://github.com/boostorg/preprocessor.git
-[submodule "contrib/type_traits"]
-	path = contrib/type_traits
-	url = https://github.com/boostorg/type_traits.git
-[submodule "contrib/utility"]
-	path = contrib/utility
-	url = https://github.com/boostorg/utility.git
-[submodule "contrib/io"]
-	path = contrib/io
-	url = https://github.com/boostorg/io.git
