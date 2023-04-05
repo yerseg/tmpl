@@ -1,0 +1,9 @@
+build
+_build
+__build
+
+out
+_out
+__out
+
+.vscode
