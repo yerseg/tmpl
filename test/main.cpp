@@ -1,3 +1,4 @@
+#include <tmpl/string.h>
 #include <tmpl/utils.h>
 
 #include <iostream>
@@ -13,6 +14,11 @@ TMPL_LIST_END()
 
 int main()
 {
+    using str = tmpl::mp_string<'H', 'e', 'l', 'l', 'o', '!'>;
+
     Worker<TestList1>::MakeWork();
+
+    std::cout << tmpl::mp_c_str_v<str> << std::endl;
+
     return 0;
 }
