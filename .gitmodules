@@ -4,3 +4,6 @@
 [submodule "contrib/preprocessor"]
 	path = contrib/preprocessor
 	url = https://github.com/boostorg/preprocessor.git
+[submodule "contrib/googletest"]
+	path = contrib/googletest
+	url = https://github.com/google/googletest.git
