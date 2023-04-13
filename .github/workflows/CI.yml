@@ -36,7 +36,7 @@ jobs:
     - name: Test
       run: |
         if [ ${{ matrix.os }} == 'windows-latest' ]; then
-          ${{github.workspace}}/_build/test/tmpl-tests.exe
+          ${{github.workspace}}/_build/test/${{env.BUILD_TYPE}}/tmpl-tests.exe
         else
           ${{github.workspace}}/_build/test/tmpl-tests
         fi
