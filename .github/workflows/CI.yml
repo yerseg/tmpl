@@ -34,7 +34,11 @@ jobs:
       run: cmake --build ${{github.workspace}}/_build --config ${{env.BUILD_TYPE}}
 
     - name: Test
-      if: ${{ matrix.os }} == 'windows-latest'
-        run: ${{github.workspace}}/_build/test/tmpl-tests.exe
-      if: ${{ matrix.os }} != 'windows-latest'
-        run: ${{github.workspace}}/_build/test/tmpl-tests
+      run: |
+        if [ ${{ matrix.os }} == 'windows-latest' ]; then
+          ${{github.workspace}}/_build/test/tmpl-tests.exe
+        else
+          ${{github.workspace}}/_build/test/tmpl-tests
+        fi
+      shell: bash
+
