@@ -2,8 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#define __STDC_LIB_EXT1__
-#include <string.h>
+#include <cstring>
 
 using namespace boost::mp11;
 using namespace tmpl;
