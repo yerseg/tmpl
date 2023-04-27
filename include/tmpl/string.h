@@ -36,3 +36,5 @@ template <typename T>
 inline constexpr auto mp_c_str_v = mp_c_str<T>::value;
 
 }  // namespace tmpl
+
+#define TMPL_MP_STRING(literal)
