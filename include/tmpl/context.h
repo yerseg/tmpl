@@ -28,11 +28,12 @@ enum class ParameterTag
     Ptr
 };
 
-template <ParameterTag ParamTag, typename Parameter>
+template <ParameterTag ParamTag, typename Parameter, bool IsHold = false>
 struct ParameterHolder
 {
     using Tag = std::integral_constant<ParameterTag, ParamTag>;
     using Type = Parameter;
+    using Hold = std::bool_constant<IsHold>;
 };
 
 template <ParameterTag Tag>
@@ -57,11 +58,27 @@ struct ParametersGetter
 
     static_assert(!Impl::IsNotExist::value, "Assertion error: there is no value with Tag in the parameter pack!");
 
-    using type = typename boost::mp11::mp_at<typename Impl::ParametersList, typename Impl::Index>::Type;
+    using holder = boost::mp11::mp_at<typename Impl::ParametersList, typename Impl::Index>;
+    using type = typename holder::Type;
 };
 
-template <Options Opts, typename... Parameters>
-struct ContextBase
+template <typename T>
+struct ContextField
+{
+    static inline T field{};
+};
+
+template <>
+struct ContextField<void>
+{};
+
+template <typename Param>
+struct FieldsProvider
+    : public ContextField<std::conditional_t<std::is_same_v<typename Param::Hold, std::true_type>, typename Param::Type, void>>
+{};
+
+template <Options Opts, typename _Tag, typename... Parameters>
+struct ContextBase : public FieldsProvider<Parameters>...
 {
     // static_assert(
     //     std::is_same_v<
@@ -71,9 +88,15 @@ struct ContextBase
 
     // field can be string, functor, everything
     template <ParameterTag Tag>
-    static constexpr auto GetField()
+    static constexpr auto Get()
     {
         return ParametersGetter<Tag, Parameters...>::type::value;
+    }
+
+    template <ParameterTag Tag>
+    static constexpr auto& GetField()
+    {
+        return FieldsProvider<typename ParametersGetter<Tag, Parameters...>::holder>::field;
     }
 
     static constexpr auto GetOptions() { return Opts; }
@@ -81,12 +104,12 @@ struct ContextBase
     // static inline typename ParametersGetter<ParameterTag::Type, Parameters...>::type some_field = nullptr;
 };
 
-template <Options Opts, typename... Parameters>
-struct ContextImpl : ContextBase<Opts, Parameters...>
+template <Options Opts, typename Tag, typename... Parameters>
+struct ContextImpl : ContextBase<Opts, Tag, Parameters...>
 {};
 
-template <typename... Parameters>
-struct ContextImpl<Options::Opt7, Parameters...> : ContextBase<Options::Opt7, Parameters...>
+template <typename Tag, typename... Parameters>
+struct ContextImpl<Options::Opt7, Tag, Parameters...> : ContextBase<Options::Opt7, Parameters...>
 {
     static inline void** some_field_2 = nullptr;
 };
@@ -100,7 +123,7 @@ struct ToContextImpl
     template <template <typename...> typename List, typename... Params>
     struct Ctxt<List<Params...>>
     {
-        using type = ContextImpl<Opts, Params...>;
+        using type = ContextImpl<Opts, List<Params...>, Params...>;
     };
 };
 
@@ -142,6 +165,8 @@ struct ToContext : detail::ToContextImpl<Opts>
 #define TMPL_STR(name) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::String, TMPL_MP_STRING(#name)>
 
 #define TMPL_TYPE(type) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Type, type>
+
+#define TMPL_FIELD(type) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Type, type, true>
 
 #define TMPL_FOO(foo) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Foo, std::integral_constant<decltype(&foo), foo>>
 

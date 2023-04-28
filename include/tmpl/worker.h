@@ -9,11 +9,11 @@ namespace tmpl {
 namespace detail {
 namespace {
 
-template <typename F>
-inline void TheSomeWork(F&& f)
+template <typename F, typename T>
+inline void TheSomeWork(F&& f, T& field)
 {
     std::cout << "Very important work: " << std::endl;
-    std::forward<F>(f)();
+    std::forward<F>(f)(field);
     std::cout << "Complete!" << std::endl;
 }
 
@@ -23,7 +23,7 @@ void SomeWork()
     constexpr auto opts = T::GetOptions();
     if constexpr (opts == Options::Opt1)
     {
-        TheSomeWork(T::template GetField<ParameterTag::Foo>());
+        TheSomeWork(T::template Get<ParameterTag::Foo>(), T::template GetField<ParameterTag::Type>());
     }
 }
 

@@ -27,6 +27,14 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup environment on Linux
+      if: matrix.os == 'ubuntu-latest'
+      run: echo "CXX=clang++-14" >> $GITHUB_ENV
+
+    - name: Setup environment on MacOS
+      if: matrix.os == 'ubuntu-latest'
+      run: echo "CXX=clang++" >> $GITHUB_ENV
+
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/_build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
