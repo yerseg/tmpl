@@ -23,7 +23,8 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
 
     env:
-      CXX: clang++-14
+      CC: clang
+      CXX: clang++
 
     steps:
     - uses: actions/checkout@v3
