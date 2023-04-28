@@ -59,7 +59,7 @@ struct ParametersGetter
     static_assert(!Impl::IsNotExist::value, "Assertion error: there is no value with Tag in the parameter pack!");
 
     using holder = boost::mp11::mp_at<typename Impl::ParametersList, typename Impl::Index>;
-    using type = holder::Type;
+    using type = typename holder::Type;
 };
 
 template <typename T>
