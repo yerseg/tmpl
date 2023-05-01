@@ -12,12 +12,6 @@ template <typename Char, Char... C>
 struct mp_string_impl
 {};
 
-template <typename Char, std::size_t Size>
-constexpr Char char_at(const Char (&str)[Size], const std::size_t i)
-{
-    return str[i];
-}
-
 template <typename Char, typename IdxSequence, typename F, F f>
 struct mp_string_from_impl;
 
@@ -85,5 +79,4 @@ inline constexpr auto mp_c_str_v = mp_c_str<T>::value;
 }  // namespace tmpl
 
 #define TMPL_MP_STRING(literal)                                                                                                            \
-    decltype(::tmpl::detail::mp_string_from_f(                                                                                             \
-        (literal), [](const std::size_t i) constexpr { return ::tmpl::detail::char_at((literal), i); }))
+    decltype(::tmpl::detail::mp_string_from_f((literal), [](const std::size_t i) constexpr { return (literal)[i]; }))
