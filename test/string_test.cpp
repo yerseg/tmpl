@@ -4,4 +4,4 @@
 
 using namespace tmpl;
 
-TEST(MpStringTest, Basic) { EXPECT_EQ("Hello!", std::string_view(mp_c_str_v<mp_string<'H', 'e', 'l', 'l', 'o', '!'>>)); }
+TEST(MpStringTest, Basic) { EXPECT_EQ("Hello!", std::string_view(mp_c_str_v<TMPL_MP_STRING("Hello!")>)); }

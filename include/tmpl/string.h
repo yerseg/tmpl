@@ -1,10 +1,57 @@
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
+#include <boost/mp11/algorithm.hpp>
+#include <boost/mp11/list.hpp>
+
 namespace tmpl {
 namespace detail {
 template <typename Char, Char... C>
 struct mp_string_impl
 {};
+
+template <typename Char, std::size_t Size>
+constexpr Char char_at(const Char (&str)[Size], const std::size_t i)
+{
+    return str[i];
+}
+
+template <typename Char, typename IdxSequence, typename F, F f>
+struct mp_string_from_impl;
+
+template <typename Char, typename F, F f, typename T, T... Idxs>
+struct mp_string_from_impl<Char, std::index_sequence<Idxs...>, F, f>
+{
+    template <typename I>
+    using char_at_idx = std::integral_constant<Char, f(I::value)>;
+
+    template <typename L>
+    struct to_mp_string;
+
+    template <typename... Indexes>
+    struct to_mp_string<boost::mp11::mp_list<Indexes...>>
+    {
+        using type = mp_string_impl<Char, Indexes::value...>;
+    };
+
+    using type = typename to_mp_string<
+        boost::mp11::mp_transform<char_at_idx, boost::mp11::mp_list<std::integral_constant<decltype(Idxs), Idxs>...>>>::type;
+};
+
+template <typename Char, size_t Size, typename F, F f>
+struct mp_string_from
+{
+    using type = typename mp_string_from_impl<Char, std::make_index_sequence<Size>, F, f>::type;
+};
+
+template <typename F, typename Char, size_t Size>
+constexpr auto mp_string_from_f(Char (&str)[Size], F f)
+{
+    return typename mp_string_from<Char, Size, F, f>::type{};
+};
+
 }  // namespace detail
 
 
@@ -37,4 +84,6 @@ inline constexpr auto mp_c_str_v = mp_c_str<T>::value;
 
 }  // namespace tmpl
 
-#define TMPL_MP_STRING(literal)
+#define TMPL_MP_STRING(literal)                                                                                                            \
+    decltype(::tmpl::detail::mp_string_from_f(                                                                                             \
+        (literal), [](const std::size_t i) constexpr { return ::tmpl::detail::char_at((literal), i); }))
