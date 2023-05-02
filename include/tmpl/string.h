@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -82,6 +83,20 @@ struct mp_c_str<detail::mp_string_impl<Char, C...>>
 
 template <typename T>
 inline constexpr auto mp_c_str_v = mp_c_str<T>::value;
+
+template <typename S>
+struct is_mp_string : public std::false_type
+{};
+
+template <typename Char, Char... C>
+struct is_mp_string<detail::mp_string_impl<Char, C...>> : public std::true_type
+{};
+
+template <typename S>
+inline constexpr bool is_mp_string_v = is_mp_string<S>::value;
+
+template <typename S>
+concept same_as_mp_string = is_mp_string_v<S>;
 
 }  // namespace tmpl
 

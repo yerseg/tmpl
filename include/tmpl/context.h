@@ -2,6 +2,7 @@
 
 #include "context.h"
 #include "options.h"
+#include "string.h"
 
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
@@ -11,6 +12,7 @@
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/list.hpp>
 
+#include <concepts>
 #include <type_traits>
 
 namespace tmpl {
@@ -19,6 +21,7 @@ namespace detail {
 
 enum class ParameterTag
 {
+    Generic,
     String,
     Type,
     Foo,
@@ -28,10 +31,16 @@ enum class ParameterTag
     Ptr
 };
 
-template <ParameterTag ParamTag, typename Parameter, bool IsHold = false>
+template <
+    typename Parameter,
+    ParameterTag ParamTag = ParameterTag::Generic,
+    bool IsHold = false,
+    typename GTag = TMPL_MP_STRING("__default_tag__")>
+    requires same_as_mp_string<GTag>
 struct ParameterHolder
 {
     using Tag = std::integral_constant<ParameterTag, ParamTag>;
+    using GenericTag = GTag;
     using Type = Parameter;
     using Hold = std::bool_constant<IsHold>;
 };
@@ -41,6 +50,14 @@ struct IsParameterTagMatch
 {
     template <typename U>
     using fn = std::bool_constant<U::Tag::value == Tag>;
+};
+
+template <typename GenericTag>
+    requires same_as_mp_string<GenericTag>
+struct IsParameterTagMatch
+{
+    template <typename U>
+    using fn = std::is_same<U::GenericTag, GenericTag>;
 };
 
 template <ParameterTag Tag, typename... Parameters>
@@ -162,20 +179,20 @@ struct ToContext : detail::ToContextImpl<Opts>
 }  // namespace detail
 }  // namespace tmpl
 
-#define TMPL_STR(name) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::String, TMPL_MP_STRING(#name)>
+#define TMPL_STR(name) ::tmpl::detail::ParameterHolder<TMPL_MP_STRING(#name), ::tmpl::detail::ParameterTag::String>
 
-#define TMPL_TYPE(type) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Type, type>
+#define TMPL_TYPE(type) ::tmpl::detail::ParameterHolder<type, ::tmpl::detail::ParameterTag::Type>
 
-#define TMPL_FIELD(type) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Type, type, true>
+#define TMPL_FIELD(type) ::tmpl::detail::ParameterHolder<type, ::tmpl::detail::ParameterTag::Type, true>
 
-#define TMPL_FOO(foo) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Foo, std::integral_constant<decltype(&foo), foo>>
+#define TMPL_FOO(foo) ::tmpl::detail::ParameterHolder<std::integral_constant<decltype(&foo), foo>, ::tmpl::detail::ParameterTag::Foo>
 
 #define TMPL_FPTR(name)                                                                                                                    \
-    ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::FooPtr, std::integral_constant<decltype(&::##name), ::##name>>
+    ::tmpl::detail::ParameterHolder<std::integral_constant<decltype(&::##name), ::##name>, ::tmpl::detail::ParameterTag::FooPtr>
 
-#define TMPL_ROUTINE(id) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Id, std::integral_constant<uint8_t, id>>
+#define TMPL_ROUTINE(id) ::tmpl::detail::ParameterHolder<std::integral_constant<uint8_t, id>, ::tmpl::detail::ParameterTag::Id>
 
-#define TMPL_CB(cb) ::tmpl::detail::ParameterHolder<::tmpl::detail::ParameterTag::Callback, std::integral_constant<decltype(&cb), cb>>
+#define TMPL_CB(cb) ::tmpl::detail::ParameterHolder<std::integral_constant<decltype(&cb), cb>, ::tmpl::detail::ParameterTag::Callback>
 
 #define TMPL_COMMA_SEP(r, token, i, e) BOOST_PP_COMMA_IF(i) BOOST_PP_CAT(token, e)
 #define TMPL_CAT(token, ...) BOOST_PP_SEQ_FOR_EACH_I(TMPL_COMMA_SEP, token, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
