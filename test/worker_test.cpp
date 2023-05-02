@@ -10,29 +10,37 @@ using namespace tmpl;
 static std::string g_test_str = {};
 static std::string g_test_str_2 = {};
 
-void Foo(char const*& ptr)
+static int* char_ptr = nullptr;
+static int* char_ptr_2 = nullptr;
+
+void Foo(int& i)
 {
     g_test_str = "Hello, World! from Foo";
-    ptr = new char[10];
-    std::memcpy((void*)ptr, (void*)g_test_str.data(), 10);
+    char_ptr = &i;
 }
 
-void Bar(char const*& ptr)
+void Bar(int& i)
 {
     g_test_str_2 = "Hello, World! from Bar";
-    ptr = new char[20];
-    std::memcpy((void*)ptr, (void*)g_test_str_2.data(), 20);
+    char_ptr_2 = &i;
 }
 
 TEST(WorkerTest, Basic)
 {
     TMPL_LIST_BEGIN(TestList, Options::Opt1)
-    TMPL_ENTRY(FOO(Foo), FIELD(char const*))
-    TMPL_ENTRY(FOO(Bar), FIELD(char const*))
+    TMPL_ENTRY(FOO(Foo), FIELD(int))
+    TMPL_ENTRY(FOO(Bar), FIELD(int))
     TMPL_LIST_END()
 
     Worker<TestList>::MakeWork();
 
     EXPECT_EQ("Hello, World! from Foo", g_test_str);
     EXPECT_EQ("Hello, World! from Bar", g_test_str_2);
+
+    EXPECT_NE(char_ptr, char_ptr_2);
+    // EXPECT_EQ("Hello, World! from Foo", char_ptr);
+    // EXPECT_EQ("Hello, World! from Bar", char_ptr_2);
+
+    // delete char_ptr;
+    // delete char_ptr_2;
 }

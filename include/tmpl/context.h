@@ -81,24 +81,25 @@ struct ParametersGetter
     using type = typename holder::Type;
 };
 
-template <typename T>
+template <typename, typename T>
 struct ContextField
 {
     static inline T field{};
 };
 
-template <>
-struct ContextField<void>
+template <typename T>
+struct ContextField<T, void>
 {};
 
-template <typename Param>
+template <typename T, typename Param>
 struct FieldsProvider
     : public ContextField<
+          T,
           std::conditional_t<std::is_same_v<typename Param::RuntimeFieldEnable, std::true_type>, typename Param::Type, void>>
 {};
 
 template <Options Opts, typename... Parameters>
-struct ContextBase : public FieldsProvider<Parameters>...
+struct ContextBase : public FieldsProvider<ContextBase<Opts, Parameters...>, Parameters>...
 {
     // static_assert(
     //     std::is_same_v<
@@ -115,7 +116,7 @@ struct ContextBase : public FieldsProvider<Parameters>...
     template <ParameterTag Tag>
     static constexpr auto& GetField()
     {
-        return FieldsProvider<typename ParametersGetter<Tag, Parameters...>::holder>::field;
+        return FieldsProvider<ContextBase<Opts, Parameters...>, typename ParametersGetter<Tag, Parameters...>::holder>::field;
     }
 
     static constexpr auto GetOptions() { return Opts; }
