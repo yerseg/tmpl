@@ -34,4 +34,5 @@ TEST(WorkerTest, Basic)
     Worker<TestList>::MakeWork();
 
     EXPECT_EQ("Hello, World! from Foo", g_test_str);
+    EXPECT_EQ("Hello, World! from Bar", g_test_str_2);
 }

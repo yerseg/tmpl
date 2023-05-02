@@ -34,15 +34,17 @@ enum class ParameterTag
 template <
     typename Parameter,
     ParameterTag ParamTag = ParameterTag::Generic,
-    bool IsHold = false,
-    typename GTag = TMPL_MP_STRING("__default_tag__")>
+    bool RuntimeFieldEnable_ = false,
+    typename GTag = TMPL_MP_STRING(
+        "__default_tag__eb7ed569-14be-47e1-bda6-94a86cee8222"                 // tag + random GUID
+        "23e693c4981b550f700e74fd9ab88ad8df4bec28854c09228dd17589c56b7efb")>  // SHA256("__default_tag__eb7ed569-14be-47e1-bda6-94a86cee8222")
     requires same_as_mp_string<GTag>
 struct ParameterHolder
 {
     using Tag = std::integral_constant<ParameterTag, ParamTag>;
     using GenericTag = GTag;
     using Type = Parameter;
-    using Hold = std::bool_constant<IsHold>;
+    using RuntimeFieldEnable = std::bool_constant<RuntimeFieldEnable_>;
 };
 
 template <ParameterTag Tag>
@@ -91,10 +93,11 @@ struct ContextField<void>
 
 template <typename Param>
 struct FieldsProvider
-    : public ContextField<std::conditional_t<std::is_same_v<typename Param::Hold, std::true_type>, typename Param::Type, void>>
+    : public ContextField<
+          std::conditional_t<std::is_same_v<typename Param::RuntimeFieldEnable, std::true_type>, typename Param::Type, void>>
 {};
 
-template <Options Opts, typename _Tag, typename... Parameters>
+template <Options Opts, typename... Parameters>
 struct ContextBase : public FieldsProvider<Parameters>...
 {
     // static_assert(
@@ -103,7 +106,6 @@ struct ContextBase : public FieldsProvider<Parameters>...
     //         typename ParametersGetter<ParameterTag::Cb, Parameters...>::type::value_type>,
     //     "Assertion error");
 
-    // field can be string, functor, everything
     template <ParameterTag Tag>
     static constexpr auto Get()
     {
@@ -117,16 +119,14 @@ struct ContextBase : public FieldsProvider<Parameters>...
     }
 
     static constexpr auto GetOptions() { return Opts; }
-
-    // static inline typename ParametersGetter<ParameterTag::Type, Parameters...>::type some_field = nullptr;
 };
 
-template <Options Opts, typename Tag, typename... Parameters>
-struct ContextImpl : ContextBase<Opts, Tag, Parameters...>
+template <Options Opts, typename... Parameters>
+struct ContextImpl : ContextBase<Opts, Parameters...>
 {};
 
-template <typename Tag, typename... Parameters>
-struct ContextImpl<Options::Opt7, Tag, Parameters...> : ContextBase<Options::Opt7, Parameters...>
+template <typename... Parameters>
+struct ContextImpl<Options::Opt7, Parameters...> : ContextBase<Options::Opt7, Parameters...>
 {
     static inline void** some_field_2 = nullptr;
 };
@@ -140,7 +140,7 @@ struct ToContextImpl
     template <template <typename...> typename List, typename... Params>
     struct Ctxt<List<Params...>>
     {
-        using type = ContextImpl<Opts, List<Params...>, Params...>;
+        using type = ContextImpl<Opts, Params...>;
     };
 };
 

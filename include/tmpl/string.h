@@ -103,8 +103,8 @@ concept same_as_mp_string = is_mp_string_v<S>;
 }  // namespace tmpl
 
 #define TMPL_MP_STRING(literal)                                                                                                            \
-    ::tmpl::detail::mp_string_from<                                                                                                        \
-        decltype(::tmpl::detail::literal_char_type(literal))::type (*)(const std::size_t),                                                 \
-        [](const std::size_t i) constexpr { return (literal)[i]; },                                                                        \
-        decltype(::tmpl::detail::literal_char_type(literal))::type,                                                                        \
-        std::size(literal)>::type
+    typename ::tmpl::detail::mp_string_from<                                                                                               \
+        decltype(::tmpl::detail::literal_char_type((literal)))::type (*)(const ::std::size_t),                                             \
+        [](const ::std::size_t i) constexpr { return ((literal))[i]; },                                                                    \
+        decltype(::tmpl::detail::literal_char_type((literal)))::type,                                                                      \
+        ::std::size(literal)>::type
