@@ -34,16 +34,18 @@ struct mp_string_from_impl<Char, std::index_sequence<Idxs...>, F, f>
         boost::mp11::mp_transform<char_at_idx, boost::mp11::mp_list<std::integral_constant<decltype(Idxs), Idxs>...>>>::type;
 };
 
-template <typename Char, size_t Size, typename F, F f>
+template <typename F, F f, typename Char, size_t Size>
 struct mp_string_from
 {
     using type = typename mp_string_from_impl<Char, std::make_index_sequence<Size>, F, f>::type;
 };
 
-template <typename F, typename Char, size_t Size>
-constexpr auto mp_string_from_f(Char (&str)[Size], F f)
+template <typename Char, size_t Size>
+struct literal_char_type
 {
-    return typename mp_string_from<Char, Size, F, f>::type{};
+    using type = Char;
+
+    constexpr literal_char_type(const Char (&)[Size]);
 };
 
 }  // namespace detail
@@ -55,13 +57,13 @@ using mp_string = detail::mp_string_impl<char, C...>;
 template <char8_t... C>
 using mp_string8 = detail::mp_string_impl<char8_t, C...>;
 
-template <char8_t... C>
+template <char16_t... C>
 using mp_string16 = detail::mp_string_impl<char16_t, C...>;
 
-template <char8_t... C>
+template <char32_t... C>
 using mp_string32 = detail::mp_string_impl<char32_t, C...>;
 
-template <char8_t... C>
+template <wchar_t... C>
 using mp_wstring = detail::mp_string_impl<wchar_t, C...>;
 
 template <typename T>
@@ -79,4 +81,8 @@ inline constexpr auto mp_c_str_v = mp_c_str<T>::value;
 }  // namespace tmpl
 
 #define TMPL_MP_STRING(literal)                                                                                                            \
-    decltype(::tmpl::detail::mp_string_from_f((literal), [](const std::size_t i) constexpr { return (literal)[i]; }))
+    ::tmpl::detail::mp_string_from<                                                                                                        \
+        decltype(::tmpl::detail::literal_char_type(literal))::type (*)(const std::size_t),                                                 \
+        [](const std::size_t i) constexpr { return (literal)[i]; },                                                                        \
+        decltype(::tmpl::detail::literal_char_type(literal))::type,                                                                        \
+        std::size(literal)>::type
