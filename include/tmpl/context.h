@@ -54,10 +54,10 @@ struct IsParameterTagMatch
 
 template <typename GenericTag>
     requires same_as_mp_string<GenericTag>
-struct IsParameterTagMatch
+struct IsGenericTagMatch
 {
     template <typename U>
-    using fn = std::is_same<U::GenericTag, GenericTag>;
+    using fn = std::is_same<typename U::GenericTag, GenericTag>;
 };
 
 template <ParameterTag Tag, typename... Parameters>
