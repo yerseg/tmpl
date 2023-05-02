@@ -4,25 +4,27 @@
 
 #include <cstring>
 
+namespace {
+
 using namespace boost::mp11;
 using namespace tmpl;
 
-static std::string g_test_str = {};
-static std::string g_test_str_2 = {};
+std::string test_str = {};
+std::string test_str_2 = {};
 
-static int* char_ptr = nullptr;
-static int* char_ptr_2 = nullptr;
+int* int_ptr = nullptr;
+int* int_ptr_2 = nullptr;
 
 void Foo(int& i)
 {
-    g_test_str = "Hello, World! from Foo";
-    char_ptr = &i;
+    test_str = "Hello, World! from Foo";
+    int_ptr = &i;
 }
 
 void Bar(int& i)
 {
-    g_test_str_2 = "Hello, World! from Bar";
-    char_ptr_2 = &i;
+    test_str_2 = "Hello, World! from Bar";
+    int_ptr_2 = &i;
 }
 
 TEST(WorkerTest, Basic)
@@ -34,13 +36,10 @@ TEST(WorkerTest, Basic)
 
     Worker<TestList>::MakeWork();
 
-    EXPECT_EQ("Hello, World! from Foo", g_test_str);
-    EXPECT_EQ("Hello, World! from Bar", g_test_str_2);
+    EXPECT_EQ("Hello, World! from Foo", test_str);
+    EXPECT_EQ("Hello, World! from Bar", test_str_2);
 
-    EXPECT_NE(char_ptr, char_ptr_2);
-    // EXPECT_EQ("Hello, World! from Foo", char_ptr);
-    // EXPECT_EQ("Hello, World! from Bar", char_ptr_2);
-
-    // delete char_ptr;
-    // delete char_ptr_2;
+    EXPECT_NE(int_ptr, int_ptr_2);
 }
+
+}  // namespace
