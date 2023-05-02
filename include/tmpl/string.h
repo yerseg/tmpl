@@ -54,8 +54,13 @@ struct literal_char_type
 template <char... C>
 using mp_string = detail::mp_string_impl<char, C...>;
 
+#if defined(__cpp_char8_t)
 template <char8_t... C>
 using mp_string8 = detail::mp_string_impl<char8_t, C...>;
+#else
+template <char... C>
+using mp_string8 = detail::mp_string_impl<char, C...>;
+#endif
 
 template <char16_t... C>
 using mp_string16 = detail::mp_string_impl<char16_t, C...>;
