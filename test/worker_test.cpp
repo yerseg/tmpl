@@ -4,34 +4,42 @@
 
 #include <cstring>
 
+namespace {
+
 using namespace boost::mp11;
 using namespace tmpl;
 
-static std::string g_test_str = {};
-static std::string g_test_str_2 = {};
+std::string test_str = {};
+std::string test_str_2 = {};
 
-void Foo(char const*& ptr)
+int* int_ptr = nullptr;
+int* int_ptr_2 = nullptr;
+
+void Foo(int& i)
 {
-    g_test_str = "Hello, World! from Foo";
-    ptr = new char[10];
-    std::memcpy((void*)ptr, (void*)g_test_str.data(), 10);
+    test_str = "Hello, World! from Foo";
+    int_ptr = &i;
 }
 
-void Bar(char const*& ptr)
+void Bar(int& i)
 {
-    g_test_str_2 = "Hello, World! from Bar";
-    ptr = new char[20];
-    std::memcpy((void*)ptr, (void*)g_test_str_2.data(), 20);
+    test_str_2 = "Hello, World! from Bar";
+    int_ptr_2 = &i;
 }
 
 TEST(WorkerTest, Basic)
 {
     TMPL_LIST_BEGIN(TestList, Options::Opt1)
-    TMPL_ENTRY(FOO(Foo), FIELD(char const*))
-    TMPL_ENTRY(FOO(Bar), FIELD(char const*))
+    TMPL_ENTRY(FOO(Foo), FIELD(int))
+    TMPL_ENTRY(FOO(Bar), FIELD(int))
     TMPL_LIST_END()
 
     Worker<TestList>::MakeWork();
 
-    EXPECT_EQ("Hello, World! from Foo", g_test_str);
+    EXPECT_EQ("Hello, World! from Foo", test_str);
+    EXPECT_EQ("Hello, World! from Bar", test_str_2);
+
+    EXPECT_NE(int_ptr, int_ptr_2);
 }
+
+}  // namespace
