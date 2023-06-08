@@ -16,7 +16,7 @@ template <template <Options, typename...> typename Context, Options Opts, typena
 struct EqualImpl<Context<Opts, Parameters...>>
 {
     template <typename Parameter>
-    using type = std::is_same<typename ParametersGetter<Parameter::Tag::value, Parameters...>::type, typename Parameter::Type>;
+    using type = std::is_same<typename ParametersGetter<typename Parameter::Tag, Parameters...>::type, typename Parameter::Type>;
 };
 
 template <typename... Parameters>

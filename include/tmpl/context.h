@@ -12,46 +12,43 @@
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/list.hpp>
 
-#include <concepts>
 #include <type_traits>
 
 namespace tmpl {
 
 namespace detail {
 
-enum class ParameterTag
+struct ParameterTag
 {
-    Generic,
-    String,
-    Type,
-    Foo,
-    FooPtr,
-    Id,
-    Callback,
-    Ptr
+    using Generic = TMPL_MP_STRING("__generic_tag__06cbdf5c-85dd-47f9-a670-6c880dbee652");
+    using String = TMPL_MP_STRING("__string_tag__c3d7b187-c7a2-4a09-9e25-0ed04dafd2dd");
+    using Type = TMPL_MP_STRING("__type_tag__7a2a7b01-6fcc-426e-b006-501f38238258");
+    using Foo = TMPL_MP_STRING("__foo_tag__33db8fcb-718b-47ee-8e7d-0a1c4e951b56");
+    using FooPtr = TMPL_MP_STRING("__fooptr_tag__c68f0ea6-04a6-4217-b064-1ca1288b75af");
+    using Id = TMPL_MP_STRING("__id_tag__7a1d3668-e5da-4727-8cf1-4d9c31bc925e");
+    using Callback = TMPL_MP_STRING("__callback_tag__51e9109e-1955-42a4-be5c-124de54ec761");
+    using Ptr = TMPL_MP_STRING("__ptr_tag__dd696df6-abb7-4478-8d94-d8392916fb7a");
 };
 
 template <
     typename Parameter,
-    ParameterTag ParamTag = ParameterTag::Generic,
+    typename ParamTag = ParameterTag::Generic,
     bool RuntimeFieldEnable_ = false,
-    typename GTag = TMPL_MP_STRING(
-        "__default_tag__eb7ed569-14be-47e1-bda6-94a86cee8222"                 // tag + random GUID
-        "23e693c4981b550f700e74fd9ab88ad8df4bec28854c09228dd17589c56b7efb")>  // SHA256("__default_tag__eb7ed569-14be-47e1-bda6-94a86cee8222")
+    typename GTag = TMPL_MP_STRING("__default_tag__eb7ed569-14be-47e1-bda6-94a86cee8222")>     // tag + random GUID
     requires same_as_mp_string<GTag>
 struct ParameterHolder
 {
-    using Tag = std::integral_constant<ParameterTag, ParamTag>;
+    using Tag = ParamTag;
     using GenericTag = GTag;
     using Type = Parameter;
     using RuntimeFieldEnable = std::bool_constant<RuntimeFieldEnable_>;
 };
 
-template <ParameterTag Tag>
+template <typename Tag>
 struct IsParameterTagMatch
 {
     template <typename U>
-    using fn = std::bool_constant<U::Tag::value == Tag>;
+    using fn = std::is_same<typename U::Tag, Tag>;
 };
 
 template <typename GenericTag>
@@ -62,7 +59,7 @@ struct IsGenericTagMatch
     using fn = std::is_same<typename U::GenericTag, GenericTag>;
 };
 
-template <ParameterTag Tag, typename... Parameters>
+template <typename Tag, typename... Parameters>
 struct ParametersGetterImpl
 {
     using ParametersList = boost::mp11::mp_list<Parameters...>;
@@ -70,7 +67,7 @@ struct ParametersGetterImpl
     using IsNotExist = std::is_same<Index, boost::mp11::mp_size<ParametersList>>;
 };
 
-template <ParameterTag Tag, typename... Parameters>
+template <typename Tag, typename... Parameters>
 struct ParametersGetter
 {
     using Impl = ParametersGetterImpl<Tag, Parameters...>;
@@ -100,13 +97,13 @@ struct ContextBase
     //         typename ParametersGetter<ParameterTag::Cb, Parameters...>::type::value_type>,
     //     "Assertion error");
 
-    template <ParameterTag Tag>
+    template <typename Tag>
     static constexpr auto Get()
     {
         return ParametersGetter<Tag, Parameters...>::type::value;
     }
 
-    template <ParameterTag Tag>
+    template <typename Tag>
     static constexpr auto& GetField()
     {
         return FieldsProvider<ContextBase<Opts, Parameters...>, typename ParametersGetter<Tag, Parameters...>::holder>::field;
